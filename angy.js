@@ -7,18 +7,27 @@ function qsa(selector) {
 }
 
 let input = ''
-result = []
+let result = []
 
 qs('button').addEventListener('click', function() {
+    result = []
     input = qs('input').value
     words = input.split(' ')
     for (let word of words) {
-        fetch(`https://api.datamuse.com/words?sl=${word}`).then(response => response.json())
+        fetch(`https://api.datamuse.com/words?sl=${word}&md=f`).then(response => response.json())
             .then(json => {
-                for (let word of json) {
-                    if word['word']
-                }
-                result.push([json[5]['word']+' ', words.indexOf(word)])
+                json.shift()
+                console.log(json)
+                
+                let rankedWords = json.sort(function(a, b) {
+                    let aFreq = parseFloat(a["tags"][0].split(":")[1])
+                    let bFreq = parseFloat(b["tags"][0].split(":")[1])
+                    aRank = aFreq + (a["score"])
+                    bRank = bFreq + (b["score"])
+                    return bRank - aRank
+                })
+                console.log(rankedWords)
+                result.push([rankedWords[0]["word"]+' ', words.indexOf(word)])
                 result.sort(function(a, b) {
                     return a[1] - b[1]
                 })
