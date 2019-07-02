@@ -1,7 +1,4 @@
 import pronouncing as phones
-import random
-import sys
-sys.setrecursionlimit(2000)
 
 sentence = input("Enter a sentence to be translated: ")
 sentence = sentence.split()
@@ -11,7 +8,6 @@ for word in sentence:
 final_sent = []
 for phone_word in phone_sent:
     final_sent += phone_word[0].split()
-print(final_sent)
 trans_sent = []
 
 def rank_words(index):
@@ -40,36 +36,22 @@ while i < len(final_sent):
     choices_at_positions.append(rank_words(i))
     i += 1
 sentences = {}
+for i in range(len(final_sent)):
+    sentences[i+1] = [[], 0]
 
-def pick_translation(index, start, frag):
-    translation_choices = []
-    blank = False
-    if not (choices_at_positions[index]):
-        blank = True
-    for choice in choices_at_positions[index]:
-        frag_right = frag[start + len(choice[2]):-1]
-        frag_left = frag[0:start]
-        if not (frag_left or frag_right):
-            translation_choices.append([choice[1], choice[0]])
-            return [choice[1], choice[0]]
-        if frag_right:
-            new_start = random.randint(0, len(frag_right)-1)
-            Rbest = pick_translation(new_start + index + len(choice) - 1, new_start, frag_right)
-        else:
-            Rbest = [0, ""]
-        if frag_left:
-            new_start = random.randint(0, len(frag_left)-1)
-            Lbest = pick_translation(new_start, new_start, frag_left)
-        else:
-            Lbest = [0, ""]
-        translation_choices.append([choice[1] + Lbest[0] + Rbest[0], choice[0] + Lbest[1] + Rbest[1]])
-    if blank:
-        return [0, ""]
-    sorted_choices = sorted(translation_choices, key=lambda item: item[0])
-    return sorted_choices[0]
+def pick_translation(sent, sentences, sentence):
+    for i in range(len(sent)):
+        j = i + 1
+        remainingPhones = len(sent) - i
+        for word in choices_at_positions[i].values():
+            if len(word[2]) <= remainingPhones and word[1].strip() not in sentence:
+                if sentences[j][1] + word[0] > sentences[j+len(word[2])][1]:
+                    sentences[j+len(word[2])] = [sentences[j][0] + [word[1]], sentences[j][1] + word[0]]
+    return sentences
 
         
-translation = pick_translation(0, 0, final_sent)
+sentences = pick_translation(final_sent, sentences, sentence)
 
-print(translation)
+sentence = [word.strip() for word in sentences[len(final_sent)-1][0]]
+print(" ".join(sentence))
             
