@@ -16,7 +16,7 @@ trans_sent = []
 
 def rank_words(index):
     with open('words.txt') as file:
-        choices = []
+        choices = {}
         for word in file.readlines():
             score = 0
             phone_word = phones.phones_for_word(word.strip())[0].split()
@@ -25,21 +25,21 @@ def rank_words(index):
                 continue
             comp_set = final_sent[index:index+length]
             for i, phone in enumerate(phone_word):
-                # print("word", word)
-                # print(comp_set[i])
-                # print(phone)
                 if phone == comp_set[i]:
                     score += 1
-            if score:
-                choices.append([word, ((score/length)*100), phone_word])
-        ranked_words = sorted(choices, key=lambda choice: choice[1], reverse=True)
-        return ranked_words
+            if length not in choices:
+                choices[length] = [score, word, phone_word]
+            elif score > choices[length][0]:
+                choices[length] = [score, word, phone_word]
+        return choices
+
 
 i = 0
 choices_at_positions = []
 while i < len(final_sent):
     choices_at_positions.append(rank_words(i))
     i += 1
+sentences = {}
 
 def pick_translation(index, start, frag):
     translation_choices = []
